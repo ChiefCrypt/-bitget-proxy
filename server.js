@@ -10,10 +10,10 @@ app.use(express.json());
 app.all('/proxy', async (req, res) => {
   try {
     const path = req.query.path;
-    const method = req.headers['x-method'] || 'GET';
-    const apiKey = req.headers['x-api-key'];
-    const secret = req.headers['x-secret'];
-    const passphrase = req.headers['x-passphrase'];
+    const apiKey = req.headers['x-api-key'] || req.headers['X-API-KEY'];
+    const secret = req.headers['x-secret'] || req.headers['X-SECRET'];
+    const passphrase = req.headers['x-passphrase'] || req.headers['X-PASSPHRASE'];
+    const method = req.headers['x-method'] || req.headers['X-METHOD'] || 'GET';
     const body = req.body ? JSON.stringify(req.body) : '';
     const timestamp = Date.now().toString();
 
