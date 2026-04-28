@@ -9,22 +9,18 @@ app.use(express.json());
 
 app.all('/proxy', async (req, res) => {
   try {
-    const apiKey = req.query.apikey;
-    const secret = req.query.secret;
-    const passphrase = req.query.passphrase;
+    const apiKey = req.headers['x-api-key'];
+    const secret = req.headers['x-secret'];
+    const passphrase = req.headers['x-passphrase'];
     const bitgetPath = req.query.path;
     const timestamp = Date.now().toString();
     const method = 'GET';
 
-    // Sign exactly: timestamp + METHOD + path (with query string)
     const toSign = timestamp + method + bitgetPath;
     const signature = crypto
       .createHmac('sha256', secret)
       .update(toSign)
       .digest('base64');
-
-    console.log('Signing:', toSign);
-    console.log('Sig:', signature);
 
     const response = await fetch('https://api.bitget.com' + bitgetPath, {
       method,
@@ -39,11 +35,9 @@ app.all('/proxy', async (req, res) => {
     });
 
     const text = await response.text();
-    console.log('Bitget response:', text);
     res.set('Content-Type', 'application/json');
     res.send(text);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -51,4 +45,5 @@ app.all('/proxy', async (req, res) => {
 app.get('/', (req, res) => res.send('Bitget proxy running'));
 
 const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log('Proxy running on port ' + PORT));
 app.listen(PORT, () => console.log('Proxy running on port ' + PORT));
