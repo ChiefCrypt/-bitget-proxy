@@ -4,7 +4,12 @@ const fetch = require('node-fetch');
 const crypto = require('crypto');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: '*'
+}));
+app.options('*', cors());
 app.use(express.json());
 
 app.all('/proxy', async (req, res) => {
