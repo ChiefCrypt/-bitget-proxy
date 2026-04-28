@@ -44,6 +44,6 @@ app.all('/proxy', async (req, res) => {
 
 app.get('/', (req, res) => res.send('Bitget proxy running'));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log('Proxy running on port ' + PORT));
 app.listen(PORT, () => console.log('Proxy running on port ' + PORT));
