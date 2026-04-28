@@ -9,22 +9,25 @@ app.use(express.json());
 
 app.all('/proxy', async (req, res) => {
   try {
-    const fullPath = req.query.path;
-    const method = 'GET';
     const apiKey = req.query.apikey;
     const secret = req.query.secret;
     const passphrase = req.query.passphrase;
+    const bitgetPath = req.query.path;
     const timestamp = Date.now().toString();
+    const method = 'GET';
 
-    // Bitget signs: timestamp + method + requestPath (including query string)
-    const prehash = timestamp + method + fullPath;
+    // Sign exactly: timestamp + METHOD + path (with query string)
+    const toSign = timestamp + method + bitgetPath;
     const signature = crypto
       .createHmac('sha256', secret)
-      .update(prehash)
+      .update(toSign)
       .digest('base64');
 
-    const response = await fetch('https://api.bitget.com' + fullPath, {
-      method: 'GET',
+    console.log('Signing:', toSign);
+    console.log('Sig:', signature);
+
+    const response = await fetch('https://api.bitget.com' + bitgetPath, {
+      method,
       headers: {
         'ACCESS-KEY': apiKey,
         'ACCESS-SIGN': signature,
@@ -35,9 +38,12 @@ app.all('/proxy', async (req, res) => {
       }
     });
 
-    const data = await response.json();
-    res.json(data);
+    const text = await response.text();
+    console.log('Bitget response:', text);
+    res.set('Content-Type', 'application/json');
+    res.send(text);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
